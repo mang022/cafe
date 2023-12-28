@@ -1,17 +1,12 @@
 package main
 
-import "github.com/gookit/config/v2"
+import "strconv"
 
 func main() {
-	keys := []string{"config"}
-	err := config.LoadFlags(keys)
-	if err != nil {
-		panic(err)
-	}
-
+	setupConfig()
 	setupDB()
 	router := setupRouter()
 
-	_ = router.Run(":8080")
+	_ = router.Run(":" + strconv.Itoa(conf.Host.Port))
 	closeDB()
 }
