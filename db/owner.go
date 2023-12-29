@@ -13,6 +13,7 @@ func SelectOwnerByID(id string) (*Owner, error) {
 			SELECT *
 			FROM owner
 			WHERE owner_id LIKE ?
+			AND deleted_at IS NULL
 			LIMIT 1
 		`,
 		id,
@@ -34,6 +35,7 @@ func SelectOwnerByPhone(phone string) (*Owner, error) {
 			SELECT *
 			FROM owner
 			WHERE phone LIKE ?
+			AND deleted_at IS NULL
 			LIMIT 1
 		`,
 		phone,
@@ -71,6 +73,7 @@ func UpdateOwnerLogin(id string) error {
 			UPDATE owner
 			SET last_login_dt = ?, updated_at = ?
 			WHERE owner_id LIKE ?
+			AND deleted_at IS NULL
 		`,
 		time.Now().Unix(),
 		time.Now(),
@@ -88,6 +91,7 @@ func UpdateOwnerLogout(id string) error {
 			UPDATE owner
 			SET last_logout_dt = ?, updated_at = ?
 			WHERE owner_id LIKE ?
+			AND deleted_at IS NULL
 		`,
 		time.Now().Unix(),
 		time.Now(),

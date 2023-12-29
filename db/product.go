@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/mang022/cafe/dto"
@@ -80,6 +81,7 @@ func UpdateProduct(pid int64, reqBody dto.UpdateProductDto) error {
 			UPDATE product
 			SET `+setQuery+`
 			WHERE product_id = ?
+			AND deleted_at IS NULL
 		`,
 		setArg...,
 	); err != nil {
@@ -95,6 +97,7 @@ func DeleteProductByID(pid int64) error {
 			UPDATE product
 			SET deleted_at = ?
 			WHERE product_id = ?
+			AND deleted_at IS NULL
 		`,
 		time.Now(),
 		pid,
@@ -103,4 +106,26 @@ func DeleteProductByID(pid int64) error {
 	}
 
 	return nil
+}
+
+func SelectProductByID(id int64) (*Product, error) {
+	var p Product
+	if err := CafeDB.Get(
+		&p,
+		`
+			SELECT *
+			FROM product
+			WHERE product_id = ?
+			AND deleted_at IS NULL
+			LIMIT 1
+		`,
+		id,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &p, nil
 }

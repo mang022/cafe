@@ -144,10 +144,45 @@ func ReadProductList(c *gin.Context) {
 }
 
 func ReadProductDetail(c *gin.Context) {
+	pid, err := strconv.ParseInt(c.Param("pid"), 10, 64)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"meta": gin.H{
+				"code":    http.StatusBadRequest,
+				"message": "잘못된 요청입니다.",
+			},
+		})
+		return
+	}
+
+	product, err := db.SelectProductByID(pid)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"meta": gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "나중에 다시 시도해주세요.",
+			},
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"meta": gin.H{
 			"code":    http.StatusOK,
 			"message": "ok",
+		},
+		"data": gin.H{
+			"id":              product.ID,
+			"category":        product.Category,
+			"price":           product.Price,
+			"cost":            product.Cost,
+			"name":            product.Name,
+			"description":     product.Description,
+			"barcode":         product.Barcode,
+			"expiration_time": product.ExpirationTime,
+			"size":            product.Size,
 		},
 	})
 }
