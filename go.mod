@@ -3,7 +3,6 @@ module github.com/mang022/cafe
 go 1.21.1
 
 require (
-	github.com/blockloop/scan/v2 v2.5.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-playground/validator/v10 v10.16.0
 	github.com/go-sql-driver/mysql v1.7.1

@@ -16,6 +16,13 @@ import (
 	uuid "github.com/nu7hatch/gouuid"
 )
 
+const ISSUER = "cafe"
+
+type OwnerClaims struct {
+	OwnerID string `json:"owner_id"`
+	jwt.RegisteredClaims
+}
+
 func SignUpOwner(c *gin.Context) {
 	var reqBody SignUpOnwerDto
 	if err := c.ShouldBindJSON(&reqBody); err != nil {
@@ -194,7 +201,8 @@ func SignInOwner(c *gin.Context) {
 func genJwtToken(ownerID string) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["owner_id"] = ownerID
-	claims["iss"] = "cafe"
+	claims["iss"] = ISSUER
+	claims["iat"] = time.Now().Unix()
 	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	token, err := at.SignedString([]byte(conf.Conf.JWT.Secret))
@@ -202,4 +210,35 @@ func genJwtToken(ownerID string) (string, error) {
 		return "", err
 	}
 	return token, nil
+}
+
+func SignOutOwner(c *gin.Context) {
+	ownerID, ok := c.Get("owner_id")
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"meta": gin.H{
+				"code":    http.StatusBadRequest,
+				"message": "잘못된 요청입니다.",
+			},
+		})
+		return
+	}
+
+	if err := db.UpdateOwnerLogout(ownerID.(string)); err != nil {
+		log.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"meta": gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "나중에 다시 시도해주세요.",
+			},
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"meta": gin.H{
+			"code":    http.StatusOK,
+			"message": "ok",
+		},
+	})
 }

@@ -69,10 +69,28 @@ func UpdateOwnerLogin(id string) error {
 	if _, err := CafeDB.Exec(
 		`
 			UPDATE owner
-			SET last_login_dt = ?
+			SET last_login_dt = ?, updated_at = ?
 			WHERE owner_id LIKE ?
 		`,
 		time.Now().Unix(),
+		time.Now(),
+		id,
+	); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UpdateOwnerLogout(id string) error {
+	if _, err := CafeDB.Exec(
+		`
+			UPDATE owner
+			SET last_logout_dt = ?, updated_at = ?
+			WHERE owner_id LIKE ?
+		`,
+		time.Now().Unix(),
+		time.Now(),
 		id,
 	); err != nil {
 		return err
