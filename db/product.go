@@ -36,7 +36,6 @@ func InsertProduct(p *Product) (int64, error) {
 }
 
 func UpdateProduct(pid int64, reqBody dto.UpdateProductDto) error {
-
 	setQuery := ""
 	setArg := make([]interface{}, 0)
 	if reqBody.Category != nil {
@@ -83,6 +82,22 @@ func UpdateProduct(pid int64, reqBody dto.UpdateProductDto) error {
 			WHERE product_id = ?
 		`,
 		setArg...,
+	); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DeleteProductByID(pid int64) error {
+	if _, err := CafeDB.Exec(
+		`
+			UPDATE product
+			SET deleted_at = ?
+			WHERE product_id = ?
+		`,
+		time.Now(),
+		pid,
 	); err != nil {
 		return err
 	}
