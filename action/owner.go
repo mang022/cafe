@@ -13,6 +13,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/mang022/cafe/conf"
 	"github.com/mang022/cafe/db"
+	"github.com/mang022/cafe/dto"
 	uuid "github.com/nu7hatch/gouuid"
 )
 
@@ -24,7 +25,7 @@ type OwnerClaims struct {
 }
 
 func SignUpOwner(c *gin.Context) {
-	var reqBody SignUpOnwerDto
+	var reqBody dto.SignUpOnwerDto
 	if err := c.ShouldBindJSON(&reqBody); err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -130,7 +131,7 @@ func hashPassword(pwd string, salt string) string {
 }
 
 func SignInOwner(c *gin.Context) {
-	var reqBody SignUpOnwerDto
+	var reqBody dto.SignUpOnwerDto
 	if err := c.ShouldBindJSON(&reqBody); err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -213,18 +214,9 @@ func genJwtToken(ownerID string) (string, error) {
 }
 
 func SignOutOwner(c *gin.Context) {
-	ownerID, ok := c.Get("owner_id")
-	if !ok {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"meta": gin.H{
-				"code":    http.StatusBadRequest,
-				"message": "잘못된 요청입니다.",
-			},
-		})
-		return
-	}
+	ownerID := c.Param("id")
 
-	if err := db.UpdateOwnerLogout(ownerID.(string)); err != nil {
+	if err := db.UpdateOwnerLogout(ownerID); err != nil {
 		log.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"meta": gin.H{

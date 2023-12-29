@@ -13,6 +13,7 @@ import (
 	"github.com/mang022/cafe/action"
 	"github.com/mang022/cafe/conf"
 	"github.com/mang022/cafe/db"
+	"github.com/mang022/cafe/dto"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -34,7 +35,7 @@ func TestSignup(t *testing.T) {
 	db.SetupDB()
 	router := setupRouter()
 
-	reqBody := action.SignUpOnwerDto{
+	reqBody := dto.SignUpOnwerDto{
 		Phone:    "010-1234-5678",
 		Password: "12345678",
 	}
@@ -55,7 +56,7 @@ func TestSignin(t *testing.T) {
 	db.SetupDB()
 	router := setupRouter()
 
-	reqBody := action.SignUpOnwerDto{
+	reqBody := dto.SignUpOnwerDto{
 		Phone:    "010-1234-5678",
 		Password: "12345678",
 	}
@@ -76,7 +77,7 @@ func TestSignout(t *testing.T) {
 	db.SetupDB()
 	router := setupRouter()
 
-	reqBody := action.SignUpOnwerDto{
+	reqBody := dto.SignUpOnwerDto{
 		Phone:    "010-1234-5678",
 		Password: "12345678",
 	}
@@ -122,7 +123,7 @@ func TestCreateProduct(t *testing.T) {
 	db.SetupDB()
 	router := setupRouter()
 
-	login := action.SignUpOnwerDto{
+	login := dto.SignUpOnwerDto{
 		Phone:    "010-1234-5678",
 		Password: "12345678",
 	}
@@ -153,7 +154,7 @@ func TestCreateProduct(t *testing.T) {
 		panic(errors.New("invalid claims"))
 	}
 
-	reqBody := action.CreateProductDto{
+	reqBody := dto.CreateProductDto{
 		Category:       "음식",
 		Price:          10000,
 		Cost:           4000,
@@ -168,6 +169,59 @@ func TestCreateProduct(t *testing.T) {
 
 	w = httptest.NewRecorder()
 	req, _ = http.NewRequest(http.MethodPost, "/owner/"+claims.OwnerID+"/product", bytes.NewBuffer(jsonBody))
+	req.Header.Add("Authorization", "Bearer "+jwtToken)
+	router.ServeHTTP(w, req)
+
+	log.Println(w.Body.String())
+	assert.Equal(t, http.StatusOK, w.Code)
+	db.CloseDB()
+}
+
+func TestUpdateProduct(t *testing.T) {
+	conf.SetupConfig()
+	db.SetupDB()
+	router := setupRouter()
+
+	login := dto.SignUpOnwerDto{
+		Phone:    "010-1234-5678",
+		Password: "12345678",
+	}
+	jsonBody, _ := json.Marshal(login)
+	log.Println(string(jsonBody))
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest(http.MethodPost, "/signin", bytes.NewBuffer(jsonBody))
+	router.ServeHTTP(w, req)
+
+	resp := make(map[string]interface{})
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		panic(err)
+	}
+
+	data := resp["data"].(map[string]interface{})
+	jwtToken := data["jwt"].(string)
+
+	token, err := jwt.ParseWithClaims(jwtToken, &action.OwnerClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(conf.Conf.JWT.Secret), nil
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	claims, ok := token.Claims.(*action.OwnerClaims)
+	if !ok {
+		panic(errors.New("invalid claims"))
+	}
+
+	price := 11000
+	reqBody := dto.UpdateProductDto{
+		Price: &price,
+	}
+	jsonBody, _ = json.Marshal(reqBody)
+	log.Println(string(jsonBody))
+
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest(http.MethodPut, "/owner/"+claims.OwnerID+"/product/1", bytes.NewBuffer(jsonBody))
 	req.Header.Add("Authorization", "Bearer "+jwtToken)
 	router.ServeHTTP(w, req)
 

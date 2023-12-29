@@ -2,6 +2,8 @@ package db
 
 import (
 	"time"
+
+	"github.com/mang022/cafe/dto"
 )
 
 func InsertProduct(p *Product) (int64, error) {
@@ -31,4 +33,59 @@ func InsertProduct(p *Product) (int64, error) {
 	}
 
 	return id, nil
+}
+
+func UpdateProduct(pid int64, reqBody dto.UpdateProductDto) error {
+
+	setQuery := ""
+	setArg := make([]interface{}, 0)
+	if reqBody.Category != nil {
+		setQuery += "category = ?, "
+		setArg = append(setArg, *reqBody.Category)
+	}
+	if reqBody.Price != nil {
+		setQuery += "price = ?, "
+		setArg = append(setArg, *reqBody.Price)
+	}
+	if reqBody.Cost != nil {
+		setQuery += "cost = ?, "
+		setArg = append(setArg, *reqBody.Cost)
+	}
+	if reqBody.Name != nil {
+		setQuery += "name = ?, "
+		setArg = append(setArg, *reqBody.Name)
+	}
+	if reqBody.Description != nil {
+		setQuery += "description = ?, "
+		setArg = append(setArg, *reqBody.Description)
+	}
+	if reqBody.Barcode != nil {
+		setQuery += "barcode = ?, "
+		setArg = append(setArg, *reqBody.Barcode)
+	}
+	if reqBody.ExpirationTime != nil {
+		setQuery += "expiration_time = ?, "
+		setArg = append(setArg, *reqBody.ExpirationTime)
+	}
+	if reqBody.Size != nil {
+		setQuery += "size = ?, "
+		setArg = append(setArg, *reqBody.Size)
+	}
+
+	setQuery += "updated_at = ?"
+	setArg = append(setArg, time.Now())
+	setArg = append(setArg, pid)
+
+	if _, err := CafeDB.Exec(
+		`
+			UPDATE product
+			SET `+setQuery+`
+			WHERE product_id = ?
+		`,
+		setArg...,
+	); err != nil {
+		return err
+	}
+
+	return nil
 }
