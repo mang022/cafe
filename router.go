@@ -35,6 +35,12 @@ func setupRouter() *gin.Engine {
 	ownerR.Use(checkJwtToken)
 	ownerR.Use(checkOwner).POST("/signout", action.SignOutOwner)
 
+	ownerR.Use(checkOwner).POST("/product", action.CreateProduct)
+	ownerR.Use(checkOwner).PUT("/product/:pid", action.UpdateProduct)
+	ownerR.Use(checkOwner).DELETE("/product/:pid", action.DeleteProduct)
+	ownerR.Use(checkOwner).GET("/product", action.ReadProductList)
+	ownerR.Use(checkOwner).GET("/product/:pid", action.ReadProductDetail)
+
 	return r
 }
 
