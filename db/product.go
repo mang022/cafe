@@ -129,3 +129,46 @@ func SelectProductByID(id int64) (*Product, error) {
 
 	return &p, nil
 }
+
+func SelectProductList(ownerID string, lastID int64, keyword string) ([]Product, error) {
+	args := make([]interface{}, 0)
+
+	query := `
+		SELECT *
+		FROM product
+		WHERE owner_id LIKE ?
+		AND deleted_at IS NULL
+	`
+	args = append(args, ownerID)
+
+	if lastID > 0 {
+		query += `AND product_id < ?
+		`
+		args = append(args, lastID)
+	}
+
+	if len(keyword) > 0 {
+		query += `AND name LIKE ?
+		`
+		args = append(args, "%"+keyword+"%")
+	}
+
+	query += `	
+		ORDER BY product_id DESC
+		LIMIT 10
+	`
+
+	p := []Product{}
+	if err := CafeDB.Select(
+		&p,
+		query,
+		args...,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return p, nil
+}
