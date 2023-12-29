@@ -1,4 +1,4 @@
-package main
+package conf
 
 import (
 	"github.com/spf13/viper"
@@ -17,9 +17,9 @@ type config struct {
 	}
 }
 
-var conf config
+var Conf config
 
-func setupConfig() {
+func SetupConfig() {
 	viper.SetConfigName("config")
 	viper.SetConfigType("json")
 	viper.AddConfigPath(".")
@@ -27,7 +27,7 @@ func setupConfig() {
 		panic(err)
 	}
 
-	if err := viper.Unmarshal(&conf); err != nil {
+	if err := viper.Unmarshal(&Conf); err != nil {
 		panic(err)
 	}
 }
