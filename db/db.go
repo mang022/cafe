@@ -1,20 +1,20 @@
 package db
 
 import (
-	"database/sql"
 	"strconv"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 
 	"github.com/mang022/cafe/conf"
 )
 
-var CafeDB *sql.DB
+var CafeDB *sqlx.DB
 
 func SetupDB() {
 	var err error
-	CafeDB, err = sql.Open("mysql", buildDataSourceName())
+	CafeDB, err = sqlx.Connect("mysql", buildDataSourceName())
 	if err != nil {
 		panic(err)
 	}

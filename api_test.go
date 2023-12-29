@@ -33,7 +33,7 @@ func TestSignup(t *testing.T) {
 	router := setupRouter()
 
 	reqBody := action.SignUpOnwerDto{
-		Phone:    "010-1234-5679",
+		Phone:    "010-1234-5678",
 		Password: "12345678",
 	}
 	jsonBody, _ := json.Marshal(reqBody)
@@ -41,6 +41,27 @@ func TestSignup(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodPost, "/signup", bytes.NewBuffer(jsonBody))
+	router.ServeHTTP(w, req)
+
+	log.Println(w.Body.String())
+	assert.Equal(t, http.StatusOK, w.Code)
+	db.CloseDB()
+}
+
+func TestSignin(t *testing.T) {
+	conf.SetupConfig()
+	db.SetupDB()
+	router := setupRouter()
+
+	reqBody := action.SignUpOnwerDto{
+		Phone:    "010-1234-5678",
+		Password: "12345678",
+	}
+	jsonBody, _ := json.Marshal(reqBody)
+	log.Println(string(jsonBody))
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest(http.MethodPost, "/signin", bytes.NewBuffer(jsonBody))
 	router.ServeHTTP(w, req)
 
 	log.Println(w.Body.String())

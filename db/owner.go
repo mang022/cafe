@@ -7,15 +7,16 @@ import (
 
 func SelectOwnerByID(id string) (*Owner, error) {
 	var o Owner
-
-	if err := CafeDB.QueryRow(
+	if err := CafeDB.Get(
+		&o,
 		`
 			SELECT *
 			FROM owner
-			WHERE owner_id = ?
+			WHERE owner_id LIKE ?
+			LIMIT 1
 		`,
 		id,
-	).Scan(&o); err != nil {
+	); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
@@ -27,15 +28,16 @@ func SelectOwnerByID(id string) (*Owner, error) {
 
 func SelectOwnerByPhone(phone string) (*Owner, error) {
 	var o Owner
-
-	if err := CafeDB.QueryRow(
+	if err := CafeDB.Get(
+		&o,
 		`
 			SELECT *
 			FROM owner
-			WHERE phone = ?
+			WHERE phone LIKE ?
+			LIMIT 1
 		`,
 		phone,
-	).Scan(&o); err != nil {
+	); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
@@ -56,6 +58,22 @@ func InsertOwner(o *Owner) error {
 		o.Salt,
 		o.Password,
 		time.Now(),
+	); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UpdateOwnerLogin(id string) error {
+	if _, err := CafeDB.Exec(
+		`
+			UPDATE owner
+			SET last_login_dt = ?
+			WHERE owner_id LIKE ?
+		`,
+		time.Now().Unix(),
+		id,
 	); err != nil {
 		return err
 	}

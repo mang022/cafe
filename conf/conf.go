@@ -15,6 +15,9 @@ type config struct {
 		User string
 		Pwd  string
 	}
+	JWT struct {
+		Secret string
+	}
 }
 
 var Conf config
