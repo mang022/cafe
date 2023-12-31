@@ -33,77 +33,16 @@ func setupRouter() *gin.Engine {
 	r.POST("/signin", action.SignInOwner)
 
 	ownerR := r.Group("/owner/:id")
-	ownerR.Use(checkJwtToken)
-	ownerR.Use(checkOwner).POST("/signout", action.SignOutOwner)
+	ownerR.Use(checkOwner)
+	ownerR.POST("/signout", action.SignOutOwner)
 
-	ownerR.Use(checkOwner).POST("/product", action.CreateProduct)
-	ownerR.Use(checkOwner).PUT("/product/:pid", action.UpdateProduct)
-	ownerR.Use(checkOwner).DELETE("/product/:pid", action.DeleteProduct)
-	ownerR.Use(checkOwner).GET("/product", action.ReadProductList)
-	ownerR.Use(checkOwner).GET("/product/:pid", action.ReadProductDetail)
+	ownerR.POST("/product", action.CreateProduct)
+	ownerR.PUT("/product/:pid", action.UpdateProduct)
+	ownerR.DELETE("/product/:pid", action.DeleteProduct)
+	ownerR.GET("/product", action.ReadProductList)
+	ownerR.GET("/product/:pid", action.ReadProductDetail)
 
 	return r
-}
-
-func checkJwtToken(c *gin.Context) {
-	jwtToken, err := extractBearerToken(c.GetHeader("Authorization"))
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"meta": gin.H{
-				"code":    http.StatusUnauthorized,
-				"message": "잘못된 요청입니다.",
-			},
-		})
-		return
-	}
-
-	token, err := parseToken(jwtToken)
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"meta": gin.H{
-				"code":    http.StatusUnauthorized,
-				"message": "잘못된 요청입니다.",
-			},
-		})
-		return
-	}
-
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"meta": gin.H{
-				"code":    http.StatusUnauthorized,
-				"message": "잘못된 요청입니다.",
-			},
-		})
-		return
-	}
-
-	expiredTime, err := claims.GetExpirationTime()
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"meta": gin.H{
-				"code":    http.StatusUnauthorized,
-				"message": "잘못된 요청입니다.",
-			},
-		})
-		return
-	}
-
-	if expiredTime.Unix() < time.Now().Unix() {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"meta": gin.H{
-				"code":    http.StatusUnauthorized,
-				"message": "잘못된 요청입니다.",
-			},
-		})
-		return
-	}
-
-	c.Next()
 }
 
 func extractBearerToken(header string) (string, error) {
@@ -136,7 +75,7 @@ func parseToken(jwtToken string) (*jwt.Token, error) {
 func checkOwner(c *gin.Context) {
 	jwtToken, err := extractBearerToken(c.GetHeader("Authorization"))
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"meta": gin.H{
 				"code":    http.StatusUnauthorized,
 				"message": "잘못된 요청입니다.",
@@ -147,7 +86,7 @@ func checkOwner(c *gin.Context) {
 
 	token, err := parseToken(jwtToken)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"meta": gin.H{
 				"code":    http.StatusUnauthorized,
 				"message": "잘못된 요청입니다.",
@@ -158,7 +97,29 @@ func checkOwner(c *gin.Context) {
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"meta": gin.H{
+				"code":    http.StatusUnauthorized,
+				"message": "잘못된 요청입니다.",
+			},
+		})
+		return
+	}
+
+	expiredTime, err := claims.GetExpirationTime()
+	if err != nil {
+		log.Println(err)
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"meta": gin.H{
+				"code":    http.StatusUnauthorized,
+				"message": "잘못된 요청입니다.",
+			},
+		})
+		return
+	}
+
+	if expiredTime.Unix() < time.Now().Unix() {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"meta": gin.H{
 				"code":    http.StatusUnauthorized,
 				"message": "잘못된 요청입니다.",
@@ -169,7 +130,7 @@ func checkOwner(c *gin.Context) {
 
 	signedID, ok := claims["owner_id"].(string)
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"meta": gin.H{
 				"code":    http.StatusUnauthorized,
 				"message": "잘못된 요청입니다.",
@@ -180,7 +141,7 @@ func checkOwner(c *gin.Context) {
 
 	reqID := c.Param("id")
 	if signedID != reqID {
-		c.JSON(http.StatusUnauthorized, gin.H{
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"meta": gin.H{
 				"code":    http.StatusUnauthorized,
 				"message": "잘못된 요청입니다.",
