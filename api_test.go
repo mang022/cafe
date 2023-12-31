@@ -328,7 +328,7 @@ func TestReadProductList(t *testing.T) {
 	router := setupRouter()
 
 	login := dto.SignUpOnwerDto{
-		Phone:    "010-1234-5679",
+		Phone:    "010-1234-5678",
 		Password: "12345678",
 	}
 	jsonBody, _ := json.Marshal(login)
