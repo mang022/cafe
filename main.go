@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -24,7 +25,7 @@ func main() {
 	log.Println("Router를 설정하였습니다.")
 
 	srv := &http.Server{
-		Addr:    ":8080",
+		Addr:    ":" + strconv.Itoa(conf.Conf.Host.Port),
 		Handler: router,
 	}
 
