@@ -13,13 +13,14 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/mang022/cafe/action"
 	"github.com/mang022/cafe/conf"
+	"github.com/mang022/cafe/dto"
 )
 
 func setupRouter() *gin.Engine {
 	r := gin.Default()
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		v.RegisterValidation("phone", action.ValidatePhone)
+		v.RegisterValidation("phone", dto.ValidatePhone)
 	}
 
 	r.GET("/ping", func(c *gin.Context) {
@@ -34,6 +35,12 @@ func setupRouter() *gin.Engine {
 	ownerR := r.Group("/owner/:id")
 	ownerR.Use(checkJwtToken)
 	ownerR.Use(checkOwner).POST("/signout", action.SignOutOwner)
+
+	ownerR.Use(checkOwner).POST("/product", action.CreateProduct)
+	ownerR.Use(checkOwner).PUT("/product/:pid", action.UpdateProduct)
+	ownerR.Use(checkOwner).DELETE("/product/:pid", action.DeleteProduct)
+	ownerR.Use(checkOwner).GET("/product", action.ReadProductList)
+	ownerR.Use(checkOwner).GET("/product/:pid", action.ReadProductDetail)
 
 	return r
 }
@@ -181,8 +188,6 @@ func checkOwner(c *gin.Context) {
 		})
 		return
 	}
-
-	c.Set("owner_id", signedID)
 
 	c.Next()
 }
