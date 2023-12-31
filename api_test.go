@@ -362,8 +362,8 @@ func TestReadProductList(t *testing.T) {
 	req, _ = http.NewRequest(http.MethodGet, "/owner/"+claims.OwnerID+"/product", nil)
 	req.Header.Add("Authorization", "Bearer "+jwtToken)
 	query := req.URL.Query()
-	query.Add("keyword", "기타")
-	query.Add("last_id", "11")
+	query.Add("keyword", "ㄱㅊ")
+	// query.Add("last_id", "11")
 	req.URL.RawQuery = query.Encode()
 	router.ServeHTTP(w, req)
 

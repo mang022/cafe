@@ -148,8 +148,9 @@ func SelectProductList(ownerID string, lastID int64, keyword string) ([]Product,
 	}
 
 	if len(keyword) > 0 {
-		query += `AND name LIKE ?
+		query += `AND (name LIKE ? OR chosung(name) LIKE ?)
 		`
+		args = append(args, "%"+keyword+"%")
 		args = append(args, "%"+keyword+"%")
 	}
 
