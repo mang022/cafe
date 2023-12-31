@@ -22,15 +22,10 @@
 	}
 }
 ```
-- `docker build -t docker.io/mystery1348/cafe:test -f ./Test.Dockerfile .`<br/>
-주의) 본인의 docker hub 주소를 사용해주시기 바랍니다. 
-tag는 아무거나 하셔도 됩니다.<br/>
-Test.Dockerfile도 원하시면 변경하셔도 됩니다.
+- `docker build -t cafe:test -f ./Test.Dockerfile .`<br/>
+주의) Test.Dockerfile도 원하시면 변경하셔도 됩니다.
 
-- `docker push docker.io/mystery1348/cafe:test`<br/>
-주의) build에 사용한 docker hub 주소와 tag를 사용해주시기 바랍니다.
-
-- `docker run -d --name cafe-test -p 10001:10001 --network="host" docker.io/mystery1348/cafe:test`<br/>
+- `docker run -d --name cafe-test -p 10001:10001 --network="host" cafe:test`<br/>
 주의) --name 옵션은 본인이 짓고 싶은 이름을 입력하시면 됩니다.<br/>
 -p 포트는 제가 임의로 10001로 지정했습니다.<br/>
 --network 옵션은 local DB에 접속하기 위해서 사용하였습니다. 원격 DB를 사용하시면 지워도 됩니다.
